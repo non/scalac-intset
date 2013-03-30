@@ -1,6 +1,5 @@
 package test
 
-import scala.collection.IterableLike
 import scala.collection.mutable.{Builder, GrowingBuilder, MapBuilder}
 import scala.collection.generic.CanBuildFrom
 
@@ -48,7 +47,7 @@ object PositiveIntSet {
 }
 
 final class PositiveIntSet private[test] (as: Array[Int], n: Int, u: Int)
-  extends Function1[Int, Boolean] with IterableLike[Int, PositiveIntSet] { self =>
+  extends Function1[Int, Boolean] with Iterable[Int] { self =>
 
   private var items: Array[Int] = as
   private var len: Int = n // how many elements are in the set
@@ -190,8 +189,4 @@ final class PositiveIntSet private[test] (as: Array[Int], n: Int, u: Int)
       throw new NoSuchElementException
     }
   }
-
-  def seq = iterator
-
-  def newBuilder = PositiveIntSet.newBuilder
 }

@@ -13,7 +13,7 @@ trait TestableSet {
 }
 
 object TestableSet {
-  def fromPosIntSet(ns: PosIntSet) = new TestableSet {
+  def fromPositiveIntSet(ns: PositiveIntSet) = new TestableSet {
     val elems = ns.copy
     def +=(item: Int): Boolean = elems += item
     def -=(item: Int): Boolean = elems -= item
@@ -87,7 +87,7 @@ object RandTest {
   }
 
   def main(args: Array[String]) {
-    run(() => TestableSet.fromPosIntSet(PosIntSet.empty))
+    run(() => TestableSet.fromPositiveIntSet(PositiveIntSet.empty))
     run(() => TestableSet.fromIntSet(IntSet.empty))
   }
 }

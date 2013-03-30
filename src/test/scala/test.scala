@@ -134,8 +134,8 @@ trait TestLike extends PropSpec with ShouldMatchers with GeneratorDrivenProperty
   }
 }
 
-class PosIntSetTest extends TestLike {
-  def emptySet() = TestableSet.fromPosIntSet(PosIntSet.empty)
+class PositiveIntSetTest extends TestLike {
+  def emptySet() = TestableSet.fromPositiveIntSet(PositiveIntSet.empty)
 }
 
 class IntSetTest extends TestLike {

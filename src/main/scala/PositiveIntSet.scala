@@ -1,10 +1,11 @@
 package test
 
+import scala.collection.IterableLike
 import scala.collection.mutable.{Builder, GrowingBuilder, MapBuilder}
 import scala.collection.generic.CanBuildFrom
 
-object PosIntSet {
-  def empty() = new PosIntSet(new Array[Int](8), 0, 0)
+object PositiveIntSet {
+  def empty() = new PositiveIntSet(new Array[Int](8), 0, 0)
 
   def apply(ns: Int*) = {
     val set = empty
@@ -15,9 +16,9 @@ object PosIntSet {
     set
   }
   
-  def newBuilder: Builder[Int, PosIntSet] =
-    new Builder[Int, PosIntSet] {
-      private var elems: PosIntSet = PosIntSet.empty
+  def newBuilder: Builder[Int, PositiveIntSet] =
+    new Builder[Int, PositiveIntSet] {
+      private var elems: PositiveIntSet = PositiveIntSet.empty
 
       override def sizeHint(size: Int) {
         var n = 8
@@ -25,7 +26,7 @@ object PosIntSet {
           n *= 2
           if (n < 0) throw new IllegalArgumentException(size.toString)
         }
-        elems = new PosIntSet(new Array[Int](n), 0, 0)
+        elems = new PositiveIntSet(new Array[Int](n), 0, 0)
       }
   
       def +=(n: Int): this.type = {
@@ -34,20 +35,20 @@ object PosIntSet {
         this
       }
   
-      def clear(): Unit = elems = PosIntSet.empty
+      def clear(): Unit = elems = PositiveIntSet.empty
   
-      def result: PosIntSet = elems
+      def result: PositiveIntSet = elems
     }
   
-  implicit def canBuildFrom: CanBuildFrom[PosIntSet, Int, PosIntSet] =
-    new CanBuildFrom[PosIntSet, Int, PosIntSet] {
-      def apply(from: PosIntSet) = newBuilder
+  implicit def canBuildFrom: CanBuildFrom[PositiveIntSet, Int, PositiveIntSet] =
+    new CanBuildFrom[PositiveIntSet, Int, PositiveIntSet] {
+      def apply(from: PositiveIntSet) = newBuilder
       def apply() = newBuilder
     }
 }
 
-final class PosIntSet private[test] (as: Array[Int], n: Int, u: Int)
-  extends Function1[Int, Boolean] with Iterable[Int] { self =>
+final class PositiveIntSet private[test] (as: Array[Int], n: Int, u: Int)
+  extends Function1[Int, Boolean] with IterableLike[Int, PositiveIntSet] { self =>
 
   private var items: Array[Int] = as
   private var len: Int = n // how many elements are in the set
@@ -106,7 +107,7 @@ final class PosIntSet private[test] (as: Array[Int], n: Int, u: Int)
     false // impossible
   }
 
-  final def copy: PosIntSet = new PosIntSet(items.clone, len, used)
+  final def copy: PositiveIntSet = new PositiveIntSet(items.clone, len, used)
 
   def apply(item: Int): Boolean = {
     var i = item & 0x7fffffff
@@ -190,5 +191,7 @@ final class PosIntSet private[test] (as: Array[Int], n: Int, u: Int)
     }
   }
 
-  override def toString = items.mkString("PosIntSet(", ", ", ")")
+  def seq = iterator
+
+  def newBuilder = PositiveIntSet.newBuilder
 }

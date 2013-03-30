@@ -21,7 +21,7 @@ class IntSetBenchmarks extends MyBenchmark {
   var data2: Array[Int] = null
 
   var miguelSet: IntSetMiguel = null
-  var posIntSet: PosIntSet = null
+  var posIntSet: PositiveIntSet = null
   var intSet: IntSet = null
 
   var j = 1
@@ -33,7 +33,7 @@ class IntSetBenchmarks extends MyBenchmark {
     data2 = init(n / 10)(nextPosInt).map(n => if(n == 0) n + 1 else n)
 
     miguelSet = new IntSetMiguel()
-    posIntSet = PosIntSet.empty()
+    posIntSet = PositiveIntSet.empty()
     intSet = IntSet.empty()
 
     var i = 0
@@ -54,8 +54,8 @@ class IntSetBenchmarks extends MyBenchmark {
     s.size
   }
 
-  def timeBuildPosIntSet(reps: Int) = run(reps) {
-    val s = PosIntSet.empty()
+  def timeBuildPositiveIntSet(reps: Int) = run(reps) {
+    val s = PositiveIntSet.empty()
     var i = 0
     val len = data.length
     while (i < len) { s += data(i); i += 1 }
@@ -81,7 +81,7 @@ class IntSetBenchmarks extends MyBenchmark {
     t
   }
 
-  def timeContainsPosIntSet(reps: Int) = run(reps) {
+  def timeContainsPositiveIntSet(reps: Int) = run(reps) {
     var i = 0
     var len = data.length
     var t = 0
@@ -115,7 +115,7 @@ class IntSetBenchmarks extends MyBenchmark {
     t
   }
 
-  def timeDeletePosIntSet(reps: Int) = run(reps) {
+  def timeDeletePositiveIntSet(reps: Int) = run(reps) {
     val es = posIntSet.copy
     var i = 0
     var len = data.length

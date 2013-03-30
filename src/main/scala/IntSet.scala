@@ -1,5 +1,6 @@
 package test
 
+import scala.collection.IterableLike
 import scala.collection.mutable.{Builder, GrowingBuilder, MapBuilder}
 import scala.collection.generic.CanBuildFrom
 
@@ -34,7 +35,7 @@ object IntSet {
   
       def result: IntSet = elems
     }
-  
+
   implicit def canBuildFrom: CanBuildFrom[IntSet, Int, IntSet] =
     new CanBuildFrom[IntSet, Int, IntSet] {
       def apply(from: IntSet) = newBuilder
@@ -43,7 +44,7 @@ object IntSet {
 }
 
 final class IntSet private[test](as: Array[Int], bs: Array[Byte], n: Int, u: Int)
-  extends Function1[Int, Boolean] with Iterable[Int] { self =>
+  extends Function1[Int, Boolean] with IterableLike[Int, IntSet] { self =>
 
   private var items: Array[Int] = as
   private var buckets: Array[Byte] = bs
@@ -197,4 +198,8 @@ final class IntSet private[test](as: Array[Int], bs: Array[Byte], n: Int, u: Int
       throw new NoSuchElementException
     }
   }
+
+  def seq = iterator
+
+  def newBuilder = IntSet.newBuilder
 }

@@ -15,18 +15,17 @@ object MyBuild extends Build {
     ),
 
     libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % "2.10.0"
-    ),
-
-    // raise memory limits here if necessary
-    javaOptions in run += "-Xmx6G",
-
-    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % "1.9.1" % "test",
+      "org.scalacheck" %% "scalacheck" % "1.10.0" % "test",
+      "org.scala-lang" % "scala-reflect" % "2.10.0",
       "com.google.guava" % "guava" % "r09",
       "com.google.code.java-allocation-instrumenter" % "java-allocation-instrumenter" % "2.0",
       "com.google.code.caliper" % "caliper" % "1.0-SNAPSHOT" from "http://n0d.es/jars/caliper-1.0-SNAPSHOT.jar",
       "com.google.code.gson" % "gson" % "1.7.1"
     ),
+
+    // raise memory limits here if necessary
+    javaOptions in run += "-Xmx6G",
 
     // enable forking in run
     fork in run := true,

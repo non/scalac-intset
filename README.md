@@ -40,9 +40,11 @@ via the `test.IntSetBenchmarks` target. The output can be processed via
 
 ### Todo
 
-1. Currently `.map` returns an `Iterable[Int]` unless the caller uses
-something like `(collection.breakOut)`. It would be good to get this
-returning `PositiveIntSet` or `IntSet` depending on what is appropriate.
+1. There is some wonkiness with the builders currently. The generic collection
+type should survive `.map` calls that change type and the `IntSet` type should
+survive `.map` calls that map to `Int`. `PositiveIntSet` is tricky because you
+can't predict whether a given `Int => Int` will result in legal (positive)
+values or not.
 
 2. It might be nice to add a faster bitset implementation as well.
 

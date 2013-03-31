@@ -26,6 +26,7 @@ class IntSetBenchmarks extends MyBenchmark {
   var intSet: IntSet = null
   var anyRefSet: AnyRefSet[Int] = null
   var scalaSet: mutable.Set[Int] = null
+  var specializedSet: SpecializedSet[Int] = null
 
   var j = 1
 
@@ -40,6 +41,7 @@ class IntSetBenchmarks extends MyBenchmark {
     intSet = IntSet.empty
     anyRefSet = AnyRefSet.empty[Int]
     scalaSet = mutable.Set.empty[Int]
+    specializedSet = SpecializedSet.empty[Int]
 
     var i = 0
     while (i < n) {
@@ -49,6 +51,7 @@ class IntSetBenchmarks extends MyBenchmark {
       intSet += item
       anyRefSet += item
       scalaSet += item
+      specializedSet += item
       i += 1
     }
   }
@@ -87,6 +90,14 @@ class IntSetBenchmarks extends MyBenchmark {
 
   def timeBuildScalaSet(reps: Int) = run(reps) {
     val s = mutable.Set.empty[Int]
+    var i = 0
+    val len = data.length
+    while (i < len) { s += data(i); i += 1 }
+    s.size
+  }
+
+  def timeBuildSpecializedSet(reps: Int) = run(reps) {
+    val s = SpecializedSet.empty[Int]
     var i = 0
     val len = data.length
     while (i < len) { s += data(i); i += 1 }
@@ -148,6 +159,17 @@ class IntSetBenchmarks extends MyBenchmark {
     t
   }
 
+  def timeContainsSpecializedSet(reps: Int) = run(reps) {
+    var i = 0
+    var len = data.length
+    var t = 0
+    while (i < len) { if (specializedSet(data(i))) t += 1; i += 1 }
+    i = 0
+    len = data2.length
+    while (i < len) { if (specializedSet(data2(i))) t += 1; i += 1 }
+    t
+  }
+
   def timeDeleteMiguel(reps: Int) = run(reps) {
     val ms = miguelSet.copy
     var i = 0
@@ -198,6 +220,18 @@ class IntSetBenchmarks extends MyBenchmark {
 
   def timeDeleteScalaSet(reps: Int) = run(reps) {
     val es = scalaSet.clone
+    var i = 0
+    var len = data.length
+    var t = 0
+    while (i < len) { es -= data(i); t += 1; i += 1 }
+    i = 0
+    len = data2.length
+    while (i < len) { es -= data2(i); t += 1; i += 1 }
+    es.size
+  }
+
+  def timeDeleteSpecializedSet(reps: Int) = run(reps) {
+    val es = specializedSet.copy
     var i = 0
     var len = data.length
     var t = 0

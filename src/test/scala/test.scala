@@ -145,3 +145,7 @@ class IntSetTest extends TestLike {
 class AnyRefSetTest extends TestLike {
   def emptySet() = TestableSet.fromAnyRefSet(AnyRefSet.empty[Int])
 }
+
+class SpecializedSetTest extends TestLike {
+  def emptySet() = TestableSet.fromSpecializedSet(SpecializedSet.empty[Int])
+}

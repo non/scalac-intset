@@ -44,7 +44,7 @@ object IntSet {
 }
 
 final class IntSet private[test](as: Array[Int], bs: Array[Byte], n: Int, u: Int)
-  extends Function1[Int, Boolean] with IterableLike[Int, IntSet] { self =>
+  extends Function1[Int, Boolean] with Iterable[Int] with IterableLike[Int, IntSet] { self =>
 
   private var items: Array[Int] = as
   private var buckets: Array[Byte] = bs
@@ -199,7 +199,5 @@ final class IntSet private[test](as: Array[Int], bs: Array[Byte], n: Int, u: Int
     }
   }
 
-  def seq = iterator
-
-  def newBuilder = IntSet.newBuilder
+  override def newBuilder = IntSet.newBuilder
 }

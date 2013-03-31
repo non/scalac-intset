@@ -47,7 +47,7 @@ object AnyRefSet {
 
 
 final class AnyRefSet[A] private[test](as: Array[AnyRef], n: Int, u: Int)
-  extends Function1[A, Boolean] with IterableLike[A, AnyRefSet[A]] { self =>
+  extends Function1[A, Boolean] with Iterable[A] with IterableLike[A, AnyRefSet[A]] { self =>
 
   private final val blocked = new Object
 
@@ -210,7 +210,5 @@ final class AnyRefSet[A] private[test](as: Array[AnyRef], n: Int, u: Int)
     }
   }
 
-  def seq = iterator
-
-  def newBuilder = AnyRefSet.newBuilder[A]
+  override def newBuilder = AnyRefSet.newBuilder[A]
 }

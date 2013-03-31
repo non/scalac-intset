@@ -54,7 +54,7 @@ object SpecializedSet {
 }
 
 final class SpecializedSet[@sp A: ClassTag] private[test](as: Array[A], bs: Array[Byte], n: Int, u: Int)
-  extends Function1[A, Boolean] with IterableLike[A, SpecializedSet[A]] { self =>
+  extends Function1[A, Boolean] with Iterable[A] with IterableLike[A, SpecializedSet[A]] { self =>
 
   private var items: Array[A] = as
   private var buckets: Array[Byte] = bs
@@ -210,7 +210,5 @@ final class SpecializedSet[@sp A: ClassTag] private[test](as: Array[A], bs: Arra
     }
   }
 
-  def seq = iterator
-
-  def newBuilder = SpecializedSet.newBuilder[A]
+  override def newBuilder = SpecializedSet.newBuilder[A]
 }

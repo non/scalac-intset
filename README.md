@@ -3,14 +3,28 @@
 These are small, fast data structures for scalac.
 
 `PositiveIntSet` is a fast set for storing positive `Int` values. It uses an
-`Array[Int]` for its element buckets, and two `Int` fields. `IntSet` is
-similar, but can store any `Int` value. It uses an `Array[Int]` as well as an
-`Array[Byte]` to track its buckets, and two `Int` fields also.
+`Array[Int]` for its element buckets, and two `Int` fields. It uses two
+sentinal values: 0 (for empty buckets) and -1 (for buckets which were
+deleted).
+
+`IntSet` is similar, but can store any `Int` value. It uses an `Array[Int]` as
+well as an `Array[Byte]` to track its buckets (instead of sentinal values),
+and two `Int` fields also.
+
+`AnyRefSet` is a generic and unspecialized set that uses the same strategy as
+`PositiveIntSet`, but uses null and a custom reference value as its sentinals.
+It is the slowest implementation but is also the closest to the existing
+`mutable.Set` implementations. Like its Scala counterpart, it cannot store null
+values.
+
+Finally, `SpecializedSet` is a generic, specialized set that uses the same
+strategy as `IntSet` (a separate bucket array). Unlike `AnyRefSet` it can
+store null or any other value.
 
 The sets will grow aggressively when small: on average the buckets will be
-around 42% full. `IntSet` will use 5/4ths of the space that `PositiveIntSet` does.
-They are mutable, and support the `Iterable[Int]` and `Int => Boolean`
-interfaces.
+around 42% full. `IntSet` and `SpecializedSet` will use 5/4ths of the space
+that `PositiveIntSet` and `AnyRefSet` use. They are all mutable, and support
+the `Iterable[A]` and `A => Boolean` interfaces.
 
 ### Todo
 
@@ -23,5 +37,3 @@ returning `PositiveIntSet` or `IntSet` depending on what is appropriate.
 3. If the numbers being used are usually going to be small and space is
 important, an implementation that tries to use `Array[Byte]` or `Array[Short]`
 when possible might result in substantial space savings.
-
-4. The `IntSet` implementation could be adapted to work with any `AnyVal`.

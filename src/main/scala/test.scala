@@ -3,6 +3,7 @@ package test
 import com.google.caliper.{Benchmark, Param, SimpleBenchmark, Runner}
 import scala.reflect.ClassTag
 import scala.util.Random._
+import scala.collection.mutable
 
 object Util {
   def pos(n: Int): Int = if (n > 0) n else if (n >= -1) 1 else -(n + 1)
@@ -21,8 +22,10 @@ class IntSetBenchmarks extends MyBenchmark {
   var data2: Array[Int] = null
 
   var miguelSet: IntSetMiguel = null
-  var posIntSet: PositiveIntSet = null
+  var positiveIntSet: PositiveIntSet = null
   var intSet: IntSet = null
+  var anyRefSet: AnyRefSet[Int] = null
+  var scalaSet: mutable.Set[Int] = null
 
   var j = 1
 
@@ -33,15 +36,19 @@ class IntSetBenchmarks extends MyBenchmark {
     data2 = init(n / 10)(nextPosInt).map(n => if(n == 0) n + 1 else n)
 
     miguelSet = new IntSetMiguel()
-    posIntSet = PositiveIntSet.empty()
-    intSet = IntSet.empty()
+    positiveIntSet = PositiveIntSet.empty
+    intSet = IntSet.empty
+    anyRefSet = AnyRefSet.empty[Int]
+    scalaSet = mutable.Set.empty[Int]
 
     var i = 0
     while (i < n) {
       val item = data(i)
       miguelSet += item
-      posIntSet += item
+      positiveIntSet += item
       intSet += item
+      anyRefSet += item
+      scalaSet += item
       i += 1
     }
   }
@@ -55,7 +62,7 @@ class IntSetBenchmarks extends MyBenchmark {
   }
 
   def timeBuildPositiveIntSet(reps: Int) = run(reps) {
-    val s = PositiveIntSet.empty()
+    val s = PositiveIntSet.empty
     var i = 0
     val len = data.length
     while (i < len) { s += data(i); i += 1 }
@@ -63,7 +70,23 @@ class IntSetBenchmarks extends MyBenchmark {
   }
 
   def timeBuildIntSet(reps: Int) = run(reps) {
-    val s = IntSet.empty()
+    val s = IntSet.empty
+    var i = 0
+    val len = data.length
+    while (i < len) { s += data(i); i += 1 }
+    s.size
+  }
+
+  def timeBuildAnyRefSet(reps: Int) = run(reps) {
+    val s = AnyRefSet.empty[Int]
+    var i = 0
+    val len = data.length
+    while (i < len) { s += data(i); i += 1 }
+    s.size
+  }
+
+  def timeBuildScalaSet(reps: Int) = run(reps) {
+    val s = mutable.Set.empty[Int]
     var i = 0
     val len = data.length
     while (i < len) { s += data(i); i += 1 }
@@ -85,10 +108,10 @@ class IntSetBenchmarks extends MyBenchmark {
     var i = 0
     var len = data.length
     var t = 0
-    while (i < len) { if (posIntSet(data(i))) t += 1; i += 1 }
+    while (i < len) { if (positiveIntSet(data(i))) t += 1; i += 1 }
     i = 0
     len = data2.length
-    while (i < len) { if (posIntSet(data2(i))) t += 1; i += 1 }
+    while (i < len) { if (positiveIntSet(data2(i))) t += 1; i += 1 }
     t
   }
 
@@ -100,6 +123,28 @@ class IntSetBenchmarks extends MyBenchmark {
     i = 0
     len = data2.length
     while (i < len) { if (intSet(data2(i))) t += 1; i += 1 }
+    t
+  }
+
+  def timeContainsAnyRefSet(reps: Int) = run(reps) {
+    var i = 0
+    var len = data.length
+    var t = 0
+    while (i < len) { if (anyRefSet(data(i))) t += 1; i += 1 }
+    i = 0
+    len = data2.length
+    while (i < len) { if (anyRefSet(data2(i))) t += 1; i += 1 }
+    t
+  }
+
+  def timeContainsScalaSet(reps: Int) = run(reps) {
+    var i = 0
+    var len = data.length
+    var t = 0
+    while (i < len) { if (scalaSet(data(i))) t += 1; i += 1 }
+    i = 0
+    len = data2.length
+    while (i < len) { if (scalaSet(data2(i))) t += 1; i += 1 }
     t
   }
 
@@ -116,7 +161,7 @@ class IntSetBenchmarks extends MyBenchmark {
   }
 
   def timeDeletePositiveIntSet(reps: Int) = run(reps) {
-    val es = posIntSet.copy
+    val es = positiveIntSet.copy
     var i = 0
     var len = data.length
     var t = 0
@@ -129,6 +174,30 @@ class IntSetBenchmarks extends MyBenchmark {
 
   def timeDeleteIntSet(reps: Int) = run(reps) {
     val es = intSet.copy
+    var i = 0
+    var len = data.length
+    var t = 0
+    while (i < len) { es -= data(i); t += 1; i += 1 }
+    i = 0
+    len = data2.length
+    while (i < len) { es -= data2(i); t += 1; i += 1 }
+    es.size
+  }
+
+  def timeDeleteAnyRefSet(reps: Int) = run(reps) {
+    val es = anyRefSet.copy
+    var i = 0
+    var len = data.length
+    var t = 0
+    while (i < len) { es -= data(i); t += 1; i += 1 }
+    i = 0
+    len = data2.length
+    while (i < len) { es -= data2(i); t += 1; i += 1 }
+    es.size
+  }
+
+  def timeDeleteScalaSet(reps: Int) = run(reps) {
+    val es = scalaSet.clone
     var i = 0
     var len = data.length
     var t = 0

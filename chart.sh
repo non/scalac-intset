@@ -8,7 +8,7 @@ BEGIN { printf("    ") }
   printf("%s ", substr($3, pf, length($3) - pf + 1)); s=$2
 }
 END { print "" }
-    ' out2.build
+    ' $3
     
     awk '
 $2 != s {
@@ -17,10 +17,23 @@ $2 != s {
 }
 { printf("%8d ", $4); s=$2 }
 END { print "" }
-    ' out2.build
+    ' $3
     echo ""
 }
 
-chart 6 "building set"
-chart 8 "membership tests"
-chart 6 "removing elements"
+if [ $# -lt 1 ]; then
+    echo "usage: $0 FILE"
+    exit 1
+fi
+
+grep Build $1 > out.tmp1
+grep Contains $1 > out.tmp2
+grep Delete $1 > out.tmp3
+
+chart 6 "building set" out.tmp1
+chart 9 "membership tests" out.tmp2
+chart 7 "removing elements" out.tmp3
+
+date
+uname -a
+java -version 2>&1

@@ -1,0 +1,37 @@
+sizes are 2^row, so row=4 -> size=16, row=10 -> size=1024
+
+building set (time in ns)
+      miguel   posint      int   anyref    scala  special 
+ 4       336      163      217      340      435      171 
+ 5       975      348      450      811     1142      379 
+ 6      1718      437      705     1273     2605      588 
+ 8      7736     2130     2082     5081    11786     2384 
+10     39988     8249     7792    15029    62202     9016 
+12    196853    44676    36114    88660   269998    43054 
+14    859292   277149   271871   444565  1129735   289321 
+
+membership tests (time in ns)
+      miguel   posint      int   anyref    scala  special 
+ 4        76       38       51      122      146       50 
+ 5       168       62       75      204      482       85 
+ 6       325      133      184      476      560      206 
+ 8      1332      524      855     1917     4244      833 
+10      5257     2041     3302     7221    17223     3112 
+12     25087    12603    16609    43742    72712    16556 
+14    127460   108922   123571   284140   369814   130137 
+
+removing elements (time in ns)
+      miguel   posint      int   anyref    scala  special 
+ 4       227       68       64      194      733       67 
+ 5       430      134      114      329     1720      121 
+ 6       952      201      230      836     4172      299 
+ 8      3998      936     1292     3230    18590     1202 
+10     15473     3835     5140    12801   105570     4836 
+12     69383    23665    35106    74251   453494    29267 
+14    353659   128105   163321   347046  1874354   138465 
+
+Sun Mar 31 11:39:25 EDT 2013
+Darwin vx-2.local 12.3.0 Darwin Kernel Version 12.3.0: Sun Jan  6 22:37:10 PST 2013; root:xnu-2050.22.13~1/RELEASE_X86_64 x86_64
+java version "1.7.0_04"
+Java(TM) SE Runtime Environment (build 1.7.0_04-b21)
+Java HotSpot(TM) 64-Bit Server VM (build 23.0-b21, mixed mode)

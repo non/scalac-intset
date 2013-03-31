@@ -26,6 +26,18 @@ around 42% full. `IntSet` and `SpecializedSet` will use 5/4ths of the space
 that `PositiveIntSet` and `AnyRefSet` use. They are all mutable, and support
 the `Iterable[A]` and `A => Boolean` interfaces.
 
+### Testing
+
+From within SBT, you can use the `test` command to run the ScalaCheck tests.
+You can also use the `run` command to run additional randomized tests using
+the `test.RandTest` target.
+
+### Benchmarking
+
+From within SBT, you can use the `run` command to run the Caliper benchmarks
+via the `test.IntSetBenchmarks` target. The output can be processed via
+`chart.sh` into a text-based table.
+
 ### Todo
 
 1. Currently `.map` returns an `Iterable[Int]` unless the caller uses

@@ -30,6 +30,15 @@ object TestableSet {
     def size: Int = elems.size
     override def toString = elems.toString
   }
+
+  def fromAnyRefSet(ns: AnyRefSet[Int]) = new TestableSet {
+    val elems = ns.copy
+    def +=(item: Int): Boolean = elems += item
+    def -=(item: Int): Boolean = elems -= item
+    def apply(item: Int): Boolean = elems(item)
+    def size: Int = elems.size
+    override def toString = elems.toString
+  }
 }
 
 
@@ -89,5 +98,6 @@ object RandTest {
   def main(args: Array[String]) {
     run(() => TestableSet.fromPositiveIntSet(PositiveIntSet.empty))
     run(() => TestableSet.fromIntSet(IntSet.empty))
+    run(() => TestableSet.fromAnyRefSet(AnyRefSet.empty[Int]))
   }
 }

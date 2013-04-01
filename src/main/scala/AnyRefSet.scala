@@ -61,6 +61,12 @@ final class AnyRefSet[A] private[test](as: Array[AnyRef], n: Int, u: Int)
 
   override def size: Int = len
 
+  def +(item: A): AnyRefSet[A] = {
+    val set = this.copy
+    set += item
+    set
+  }
+
   def +=(item: A): Boolean = {
     if (item == null) throw new IllegalArgumentException("cannot insert null")
     var i = item.## & 0x7fffffff
@@ -95,6 +101,14 @@ final class AnyRefSet[A] private[test](as: Array[AnyRef], n: Int, u: Int)
     false // impossible
   }
 
+  def ++=(rhs: Traversable[A]): Unit = rhs.foreach(this += _)
+
+  def -(item: A): AnyRefSet[A] = {
+    val set = this.copy
+    set -= item
+    set
+  }
+
   def -=(item: A): Boolean = {
     var i = item.## & 0x7fffffff
     var perturbation = i
@@ -115,9 +129,48 @@ final class AnyRefSet[A] private[test](as: Array[AnyRef], n: Int, u: Int)
     false // impossible
   }
 
+  def --(rhs: Traversable[A]): AnyRefSet[A] = {
+    val set = this.copy
+    rhs.foreach(set -= _)
+    set
+  }
+
+  def --=(rhs: Traversable[A]): Unit = rhs.foreach(this -= _)
+
+  def |(rhs: AnyRefSet[A]): AnyRefSet[A] =
+    if (size >= rhs.size) {
+      val set = this.copy
+      rhs.foreach(set += _)
+      set
+    } else {
+      val set = rhs.copy
+      this.foreach(set += _)
+      set
+    }
+
+  def |=(rhs: AnyRefSet[A]): Unit = rhs.foreach(this += _)
+
+  def &(rhs: AnyRefSet[A]): AnyRefSet[A] = {
+    val set = AnyRefSet.empty[A]
+    if (size <= rhs.size)
+      this.foreach(n => if (rhs(n)) set += n)
+    else
+      rhs.foreach(n => if (this(n)) set += n)
+    set
+  }
+
+  def &=(rhs: AnyRefSet[A]): Unit = {
+    val set = this & rhs
+    items = set.items
+    len = set.len
+    used = set.used
+    mask = set.mask
+    limit = set.limit
+  }
+
   def copy: AnyRefSet[A] = new AnyRefSet[A](items.clone, len, used)
 
-  def apply(item: A): Boolean = {
+  private[test] def unsafeApply(item: AnyRef): Boolean = {
     var i = item.## & 0x7fffffff
     var perturbation = i
     while (true) {
@@ -134,6 +187,8 @@ final class AnyRefSet[A] private[test](as: Array[AnyRef], n: Int, u: Int)
     }
     false // impossible
   }
+
+  def apply(item: A): Boolean = unsafeApply(item.asInstanceOf[AnyRef])
 
   private def hash(item: A, mask0: Int, items0: Array[AnyRef]): Int = {
     var i = item.## & 0x7fffffff
@@ -211,4 +266,11 @@ final class AnyRefSet[A] private[test](as: Array[AnyRef], n: Int, u: Int)
   }
 
   override def newBuilder = AnyRefSet.newBuilder[A]
+
+  override def equals(rhs: Any) = rhs match {
+    case set: AnyRefSet[_] =>
+      size == set.size && forall(a => set.unsafeApply(a.asInstanceOf[AnyRef]))
+    case _ =>
+      false
+  }
 }

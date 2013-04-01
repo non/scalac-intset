@@ -49,15 +49,21 @@ object PositiveIntSet {
 final class PositiveIntSet private[test] (as: Array[Int], n: Int, u: Int)
   extends Function1[Int, Boolean] with Iterable[Int] { self =>
 
-  private var items: Array[Int] = as
-  private var len: Int = n // how many elements are in the set
-  private var used: Int = u // how many slots are currently in use
+  private[test] var items: Array[Int] = as
+  private[test] var len: Int = n // how many elements are in the set
+  private[test] var used: Int = u // how many slots are currently in use
 
   // hashing internals
-  private var mask = items.length - 1 // size-1, used for hashing
-  private var limit = (items.length * 0.65).toInt // resize at this point
+  private[test] var mask = items.length - 1 // size-1, used for hashing
+  private[test] var limit = (items.length * 0.65).toInt // resize at this point
 
   final override def size: Int = len
+
+  final def +(item: Int): PositiveIntSet = {
+    val set = this.copy
+    set += item
+    set
+  }
 
   final def +=(item: Int): Boolean = {
     var i = item & 0x7fffffff
@@ -86,6 +92,20 @@ final class PositiveIntSet private[test] (as: Array[Int], n: Int, u: Int)
     false // impossible
   }
 
+  def ++(rhs: Traversable[Int]): PositiveIntSet = {
+    val set = this.copy
+    rhs.foreach(set += _)
+    set
+  }
+
+  def ++=(rhs: Traversable[Int]): Unit = rhs.foreach(this += _)
+
+  final def -(item: Int): PositiveIntSet = {
+    val set = this.copy
+    set -= item
+    set
+  }
+
   def -=(item: Int): Boolean = {
     var i = item & 0x7fffffff
     var perturbation = i
@@ -104,6 +124,45 @@ final class PositiveIntSet private[test] (as: Array[Int], n: Int, u: Int)
       }
     }
     false // impossible
+  }
+
+  def --(rhs: Traversable[Int]): PositiveIntSet = {
+    val set = this.copy
+    rhs.foreach(set -= _)
+    set
+  }
+
+  def --=(rhs: Traversable[Int]): Unit = rhs.foreach(this -= _)
+
+  def |(rhs: PositiveIntSet): PositiveIntSet =
+    if (size >= rhs.size) {
+      val set = this.copy
+      rhs.foreach(set += _)
+      set
+    } else {
+      val set = rhs.copy
+      this.foreach(set += _)
+      set
+    }
+
+  def |=(rhs: PositiveIntSet): Unit = rhs.foreach(this += _)
+
+  def &(rhs: PositiveIntSet): PositiveIntSet = {
+    val set = PositiveIntSet.empty
+    if (size <= rhs.size)
+      this.foreach(n => if (rhs(n)) set += n)
+    else
+      rhs.foreach(n => if (this(n)) set += n)
+    set
+  }
+
+  def &=(rhs: PositiveIntSet): Unit = {
+    val set = this & rhs
+    items = set.items
+    len = set.len
+    used = set.used
+    mask = set.mask
+    limit = set.limit
   }
 
   final def copy: PositiveIntSet = new PositiveIntSet(items.clone, len, used)
@@ -188,5 +247,12 @@ final class PositiveIntSet private[test] (as: Array[Int], n: Int, u: Int)
       }
       throw new NoSuchElementException
     }
+  }
+
+  override def equals(rhs: Any) = rhs match {
+    case set: PositiveIntSet =>
+      size == set.size && forall(set.apply)
+    case _ =>
+      false
   }
 }

@@ -53,19 +53,27 @@ object SpecializedSet {
     new SpecializedSetCbf[A]
 }
 
-final class SpecializedSet[@sp A: ClassTag] private[test](as: Array[A], bs: Array[Byte], n: Int, u: Int)
+final class SpecializedSet[@sp A] private[test](as: Array[A], bs: Array[Byte], n: Int, u: Int)(implicit ev: ClassTag[A])
   extends Function1[A, Boolean] with Iterable[A] with IterableLike[A, SpecializedSet[A]] { self =>
 
-  private var items: Array[A] = as
-  private var buckets: Array[Byte] = bs
-  private var len: Int = n
-  private var used: Int = u
+  private[test] var ct: Any = ev
+
+  private[test] var items: Array[A] = as
+  private[test] var buckets: Array[Byte] = bs
+  private[test] var len: Int = n
+  private[test] var used: Int = u
 
   // hashing internals
-  private var mask = items.length - 1 // size-1, used for hashing
-  private var limit = (items.length * 0.65).toInt // when we should resize
+  private[test] var mask = items.length - 1 // size-1, used for hashing
+  private[test] var limit = (items.length * 0.65).toInt // when we should resize
 
   override def size: Int = len
+
+  def +(item: A): SpecializedSet[A] = {
+    val set = this.copy
+    set += item
+    set
+  }
 
   def +=(item: A): Boolean = {
     var i = item.## & 0x7fffffff
@@ -95,6 +103,14 @@ final class SpecializedSet[@sp A: ClassTag] private[test](as: Array[A], bs: Arra
     false // impossible
   }
 
+  def ++=(rhs: Traversable[A]): Unit = rhs.foreach(this += _)
+
+  def -(item: A): SpecializedSet[A] = {
+    val set = this.copy
+    set -= item
+    set
+  }
+
   def -=(item: A): Boolean = {
     var i = item.## & 0x7fffffff
     var perturbation = i
@@ -113,6 +129,46 @@ final class SpecializedSet[@sp A: ClassTag] private[test](as: Array[A], bs: Arra
       }
     }
     false // impossible
+  }
+
+  def --(rhs: Traversable[A]): SpecializedSet[A] = {
+    val set = this.copy
+    rhs.foreach(set -= _)
+    set
+  }
+
+  def --=(rhs: Traversable[A]): Unit = rhs.foreach(this -= _)
+
+  def |(rhs: SpecializedSet[A]): SpecializedSet[A] =
+    if (size >= rhs.size) {
+      val set = this.copy
+      rhs.foreach(set += _)
+      set
+    } else {
+      val set = rhs.copy
+      this.foreach(set += _)
+      set
+    }
+
+  def |=(rhs: SpecializedSet[A]): Unit = rhs.foreach(this += _)
+
+  def &(rhs: SpecializedSet[A]): SpecializedSet[A] = {
+    val set = SpecializedSet.empty[A]
+    if (size <= rhs.size)
+      this.foreach(n => if (rhs(n)) set += n)
+    else
+      rhs.foreach(n => if (this(n)) set += n)
+    set
+  }
+
+  def &=(rhs: SpecializedSet[A]): Unit = {
+    val set = this & rhs
+    items = set.items
+    buckets = set.buckets
+    len = set.len
+    used = set.used
+    mask = set.mask
+    limit = set.limit
   }
 
   def copy: SpecializedSet[A] = new SpecializedSet[A](items.clone, buckets.clone, len, used)
@@ -211,4 +267,11 @@ final class SpecializedSet[@sp A: ClassTag] private[test](as: Array[A], bs: Arra
   }
 
   override def newBuilder = SpecializedSet.newBuilder[A]
+
+  override def equals(rhs: Any) = rhs match {
+    case set: SpecializedSet[_] =>
+      ct == set.ct && size == set.size && set.asInstanceOf[SpecializedSet[A]].forall(apply)
+    case _ =>
+      false
+  }
 }

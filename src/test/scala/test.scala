@@ -8,9 +8,10 @@ import prop._
 
 import org.scalacheck.Arbitrary._
 
-trait TestLike extends PropSpec with ShouldMatchers with GeneratorDrivenPropertyChecks {
+trait TestLike[T <: TestableSet[U], U <: Iterable[Int]]
+  extends PropSpec with ShouldMatchers with GeneratorDrivenPropertyChecks {
 
-  def emptySet(): TestableSet
+  def emptySet(): T
 
   property("Util.pos(x) > 0") {
     forAll { x: Int =>
@@ -18,7 +19,7 @@ trait TestLike extends PropSpec with ShouldMatchers with GeneratorDrivenProperty
     }
   }
 
-  property("add a single element") {
+  property("add a single element (+=)") {
     forAll { (n1: Int, n2: Int) =>
       val x = Util.pos(n1)
       val y = Util.pos(n2)
@@ -57,7 +58,7 @@ trait TestLike extends PropSpec with ShouldMatchers with GeneratorDrivenProperty
     }
   }
 
-  property("adding elements") {
+  property("adding elements (+=)") {
     forAll { ns: Set[Int] =>
       val xs = ns.map(Util.pos)
       val set = emptySet()
@@ -84,7 +85,7 @@ trait TestLike extends PropSpec with ShouldMatchers with GeneratorDrivenProperty
     }
   }
 
-  property("removing elements") {
+  property("removing elements (-=)") {
     forAll { ns: Set[Int] =>
       val xs = ns.map(Util.pos)
       val set = emptySet()
@@ -104,7 +105,7 @@ trait TestLike extends PropSpec with ShouldMatchers with GeneratorDrivenProperty
     }
   }
 
-  property("random operations") {
+  property("random += and -=") {
     forAll { (ns: List[Int], bs: List[Boolean]) =>
       val tpls = ns.map(Util.pos).zip(bs)
       val set = emptySet()
@@ -132,20 +133,107 @@ trait TestLike extends PropSpec with ShouldMatchers with GeneratorDrivenProperty
       }
     }
   }
+
+  property("bulk add (++=)") {
+    forAll { (xs0: List[Int], ys0: List[Int]) =>
+      val xs = xs0.map(Util.pos)
+      val ys = ys0.map(Util.pos)
+
+      val a = emptySet()
+      val b = emptySet()
+      val c = emptySet()
+
+      a ++= xs
+      xs.foreach(b += _)
+      a.elems should be === b.elems
+
+      a ++= ys
+      c ++= (xs ++ ys)
+      a.elems should be === c.elems
+    }
+  }
+
+  property("union (|)") {
+    forAll { (xs0: Set[Int], ys0: Set[Int]) =>
+      val xs = xs0.map(Util.pos)
+      val ys = ys0.map(Util.pos)
+      val zs = xs | ys
+
+      val as = emptySet()
+      xs.foreach(as += _)
+
+      val bs = emptySet()
+      ys.foreach(bs += _)
+
+      val cs = emptySet()
+      zs.foreach(cs += _)
+
+      (as | bs.elems) should be === cs.elems
+    }
+  }
+
+  property("intersection (&)") {
+    forAll { (xs0: Set[Int], ys0: Set[Int]) =>
+      val xs = xs0.map(Util.pos)
+      val ys = ys0.map(Util.pos)
+      val zs = xs & ys
+
+      val as = emptySet()
+      xs.foreach(as += _)
+
+      val bs = emptySet()
+      ys.foreach(bs += _)
+
+      val cs = emptySet()
+      zs.foreach(cs += _)
+
+      (as & bs.elems) should be === cs.elems
+    }
+  }
+
+  property("difference (--)") {
+    forAll { (xs0: Set[Int], ys0: Set[Int]) =>
+      val xs = xs0.map(Util.pos)
+      val ys = ys0.map(Util.pos)
+      val zs = xs -- ys
+
+      val as = emptySet()
+      xs.foreach(as += _)
+
+      val bs = emptySet()
+      ys.foreach(bs += _)
+
+      val cs = emptySet()
+      zs.foreach(cs += _)
+
+      (as -- bs.elems) should be === cs.elems
+    }
+  }
+
+  property("size") {
+    forAll { (xs0: List[Int], ys0: List[Int]) =>
+      val xs = xs0.map(Util.pos)
+      val ys = ys0.map(Util.pos)
+
+      val as = emptySet() ++ (xs ++ ys)
+      val control = (xs ++ ys).toSet
+      as.size should be === control.size
+    }
+  }
 }
 
-class PositiveIntSetTest extends TestLike {
+class PositiveIntSetTest extends TestLike[TestablePositiveIntSet, PositiveIntSet] {
   def emptySet() = TestableSet.fromPositiveIntSet(PositiveIntSet.empty)
 }
 
-class IntSetTest extends TestLike {
+class IntSetTest extends TestLike[TestableIntSet, IntSet] {
   def emptySet() = TestableSet.fromIntSet(IntSet.empty)
 }
 
-class AnyRefSetTest extends TestLike {
+class AnyRefSetTest extends TestLike[TestableAnyRefSet, AnyRefSet[Int]] {
   def emptySet() = TestableSet.fromAnyRefSet(AnyRefSet.empty[Int])
 }
 
-class SpecializedSetTest extends TestLike {
+class SpecializedSetTest extends TestLike[TestableSpecializedSet, SpecializedSet[Int]] {
   def emptySet() = TestableSet.fromSpecializedSet(SpecializedSet.empty[Int])
 }

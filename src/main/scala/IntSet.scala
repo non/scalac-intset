@@ -57,6 +57,12 @@ final class IntSet private[test](as: Array[Int], bs: Array[Byte], n: Int, u: Int
 
   override def size: Int = len
 
+  def +(item: Int): IntSet = {
+    val set = this.copy
+    set += item
+    set
+  }
+
   def +=(item: Int): Boolean = {
     var i = item & 0x7fffffff
     var perturbation = i
@@ -85,6 +91,14 @@ final class IntSet private[test](as: Array[Int], bs: Array[Byte], n: Int, u: Int
     false // impossible
   }
 
+  def ++=(rhs: Traversable[Int]): Unit = rhs.foreach(this += _)
+
+  def -(item: Int): IntSet = {
+    val set = this.copy
+    set -= item
+    set
+  }
+
   def -=(item: Int): Boolean = {
     var i = item & 0x7fffffff
     var perturbation = i
@@ -103,6 +117,46 @@ final class IntSet private[test](as: Array[Int], bs: Array[Byte], n: Int, u: Int
       }
     }
     false // impossible
+  }
+
+  def --(rhs: Traversable[Int]): IntSet = {
+    val set = this.copy
+    rhs.foreach(set -= _)
+    set
+  }
+
+  def --=(rhs: Traversable[Int]): Unit = rhs.foreach(this -= _)
+
+  def |(rhs: IntSet): IntSet =
+    if (size >= rhs.size) {
+      val set = this.copy
+      rhs.foreach(set += _)
+      set
+    } else {
+      val set = rhs.copy
+      this.foreach(set += _)
+      set
+    }
+
+  def |=(rhs: IntSet): Unit = rhs.foreach(this += _)
+
+  def &(rhs: IntSet): IntSet = {
+    val set = IntSet.empty
+    if (size <= rhs.size)
+      this.foreach(n => if (rhs(n)) set += n)
+    else
+      rhs.foreach(n => if (this(n)) set += n)
+    set
+  }
+
+  def &=(rhs: IntSet): Unit = {
+    val set = this & rhs
+    items = set.items
+    buckets = set.buckets
+    len = set.len
+    used = set.used
+    mask = set.mask
+    limit = set.limit
   }
 
   def copy: IntSet = new IntSet(items.clone, buckets.clone, len, used)
@@ -200,4 +254,11 @@ final class IntSet private[test](as: Array[Int], bs: Array[Byte], n: Int, u: Int
   }
 
   override def newBuilder = IntSet.newBuilder
+
+  override def equals(rhs: Any) = rhs match {
+    case set: IntSet =>
+      size == set.size && forall(set.apply)
+    case _ =>
+      false
+  }
 }
